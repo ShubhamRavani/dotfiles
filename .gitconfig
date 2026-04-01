@@ -1,0 +1,15 @@
+[user]
+	name = shubhamRavani
+	email = shubhamravani67890@gmail.com
+[credential]
+	helper = 
+	helper = /usr/local/bin/git-credential-manager
+	credentialStore = plaintext
+	helper = store
+	cacheOptions = --timeout 300
+[credential "https://dev.azure.com"]
+	useHttpPath = true
+[pull]
+	rebase = false
+[init]
+	defaultBranch = main
