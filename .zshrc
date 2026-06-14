@@ -1,5 +1,3 @@
-unset KITTY_SHELL_INTEGRATION
-
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -31,21 +29,27 @@ znap source zsh-users/zsh-autosuggestions
 znap source marlonrichert/zsh-autocomplete
 
 # Aliases
-alias apt-up="sudo apt-get update && stuod apt-get upgrade"
-alias rm-db="sudo rm -rf db-data"
-alias mv-db="mv ./unnati-db/db-data ."
-alias dev="npm run dev"
-alias start="npm run start:dev"
 alias up="sudo docker compose up"
 alias cat=bat
-alias zshconfig="vi ~/.zshrc"
-alias ls="eza --color=always --long --git --icons=always --no-time --no-user"
-alias ssh="kitty +kitten ssh"
-alias src="source ~/.zshrc"
 
-export NVM_DIR="$HOME/.config/nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# NVM Setup
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" 
+
+# pnpm
+export PNPM_HOME="$HOME/.local/share/pnpm"
+case ":$PATH:" in
+*":$PNPM_HOME:"*) ;;
+*) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH=$BUN_INSTALL/bin:$PATH
+# bun completions
+[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
 
 autoload -U add-zsh-hook
 load-nvmrc() {
@@ -69,44 +73,37 @@ load-nvmrc
 
 # 🌸 Initialize prompt
 eval "$(starship init zsh)"
+
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-JAVA_HOME="/usr/java/jre1.8.0_371"
-
-# pnpm
-export PNPM_HOME="/home/shubham/.local/share/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
+export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))" 2>/dev/null
 
 # sst
-export PATH=/home/shubham/.sst/bin:$PATH
+export PATH=$HOME/.sst/bin:$PATH
 
 # fly.io
-export FLYCTL_INSTALL="/home/shubham/.fly"
+export FLYCTL_INSTALL="$HOME/.fly"
 export PATH="$FLYCTL_INSTALL/bin:$PATH"
 
 # atuin
-. "$HOME/.atuin/bin/env"
-
-eval "$(atuin init zsh)"
+if [ -d $HOME/.atuin/bin/env ]; then . $HOME/.atuin/bin/env; fi
 eval "$(atuin init zsh)"
 
-export PATH="$HOME/.cargo/bin:$PATH"
-export PATH=$PATH:~/.local/bin
+# Go
+export PATH=$PATH:$HOME/go/bin
+export PATH=$PATH:/usr/local/go/bin
 
-# bun completions
-[ -s "/home/shubham/.bun/_bun" ] && source "/home/shubham/.bun/_bun"
 
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
+if [[ -v VSCODE_INJECTION ]]; then
+else
+  eval "$(zellij setup --generate-auto-start zsh)"
+fi
 
 # Bat theme
-export BAT_THEME="Solarized (dark)"
-export PATH=$PATH:$HOME/bin
+# use bat for cat
+if command -v bat &>/dev/null; then
+  alias cat='bat'
+fi
 
 # The F*ck
 eval $(thefuck --alias)
@@ -121,9 +118,12 @@ function yy() {
 	rm -f -- "$tmp"
 }
 
-# zellij setup
-eval "$(zellij setup --generate-auto-start zsh)"
+# zoxide setup
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init zsh)"
+fi
 
-# zoxide
-eval "$(zoxide init zsh)"
-export PATH=$PATH:/usr/local/go/bin
+# use eza for ls
+if command -v eza &>/dev/null; then
+  alias ls='eza --icons=always --color=always --long'
+fi
