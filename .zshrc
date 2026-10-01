@@ -1,3 +1,6 @@
+# User binaries (zellij, yazi, starship, zoxide, bat on Ubuntu)
+export PATH="$HOME/.local/bin:$PATH"
+
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -30,7 +33,6 @@ znap source marlonrichert/zsh-autocomplete
 
 # Aliases
 alias up="sudo docker compose up"
-alias cat=bat
 
 # NVM Setup
 export NVM_DIR="$HOME/.nvm"
@@ -53,6 +55,7 @@ export PATH=$BUN_INSTALL/bin:$PATH
 
 autoload -U add-zsh-hook
 load-nvmrc() {
+  command -v nvm_find_nvmrc &>/dev/null || return
   local nvmrc_path="$(nvm_find_nvmrc)"
 
   if [ -n "$nvmrc_path" ]; then
@@ -72,11 +75,13 @@ add-zsh-hook chpwd load-nvmrc
 load-nvmrc
 
 # 🌸 Initialize prompt
-eval "$(starship init zsh)"
+if command -v starship &>/dev/null; then
+  eval "$(starship init zsh)"
+fi
 
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-export JAVA_HOME="$(dirname $(dirname $(readlink -f $(which java))))" 2>/dev/null
+if command -v java &>/dev/null; then
+  export JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"
+fi
 
 # sst
 export PATH=$HOME/.sst/bin:$PATH
@@ -86,16 +91,20 @@ export FLYCTL_INSTALL="$HOME/.fly"
 export PATH="$FLYCTL_INSTALL/bin:$PATH"
 
 # atuin
-if [ -d $HOME/.atuin/bin/env ]; then . $HOME/.atuin/bin/env; fi
-eval "$(atuin init zsh)"
+[ -f "$HOME/.atuin/bin/env" ] && . "$HOME/.atuin/bin/env"
+if command -v atuin &>/dev/null; then
+  eval "$(atuin init zsh)"
+fi
+
+# Rust / cargo (only if rustup is installed)
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # Go
 export PATH=$PATH:$HOME/go/bin
 export PATH=$PATH:/usr/local/go/bin
 
 
-if [[ -v VSCODE_INJECTION ]]; then
-else
+if [[ ! -v VSCODE_INJECTION ]] && command -v zellij &>/dev/null; then
   eval "$(zellij setup --generate-auto-start zsh)"
 fi
 
@@ -106,7 +115,9 @@ if command -v bat &>/dev/null; then
 fi
 
 # The F*ck
-eval $(thefuck --alias)
+if command -v thefuck &>/dev/null; then
+  eval "$(thefuck --alias 2>/dev/null)"
+fi
 
 # 📂 Yazi
 function yy() {
@@ -127,3 +138,6 @@ fi
 if command -v eza &>/dev/null; then
   alias ls='eza --icons=always --color=always --long'
 fi
+
+# opencode
+export PATH="$HOME/.opencode/bin:$PATH"

@@ -120,10 +120,13 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-. "$HOME/.atuin/bin/env"
+export PATH="$HOME/.local/bin:$PATH"
+
+[ -f "$HOME/.atuin/bin/env" ] && . "$HOME/.atuin/bin/env"
 
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
-eval "$(atuin init bash)"
-. "$HOME/.cargo/env"
+command -v atuin &>/dev/null && eval "$(atuin init bash)"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 export PATH=$PATH:/usr/local/go/bin
-export PATH=$PATH:/usr/local/go/bin
+
+command -v starship &>/dev/null && eval "$(starship init bash)"
